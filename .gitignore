@@ -1,0 +1,6 @@
+*.png
+*.eps
+*.tif
+*.pdf
+**/__pycache__/
+data/param_files/**
