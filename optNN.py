@@ -109,6 +109,7 @@ class Optimization():
         # give me a species string, 
         # import the raw inputs from csv
         # normlize with scaler
+        self.species = species
         df_opt_inputs = pd.read_csv("./data/opt_inputs.csv")
         df_opt_inputs = df_opt_inputs.set_index('species')
         scaled_inputs = self.pipe.transform(df_opt_inputs)[0][:len(self.given_params)]
@@ -216,7 +217,7 @@ class Optimization():
             optimize_loss.append(loss.tolist())
         
         output_lines_df = pd.DataFrame(output_lines[1:], columns = output_lines[0])
-        output_lines_df.to_csv("./experiments/opt.csv")
+        output_lines_df.to_csv(f"./experiments/{self.species}_opt.csv")
 
         # get/show final performance
         self.opt_net.eval()
