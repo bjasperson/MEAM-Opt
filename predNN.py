@@ -267,13 +267,13 @@ def train_predNN(df,
 
     print('----Evaluate done ----')
 
+    output = {'predNN':network,
+            'pipe':pipe,
+            'label_scaler':label_scaler}
     ###########################################
     if save_out == True:
         if input('save NN model + stats? y to save:    ') == 'y':
             # make timestamp
-            output = {'predNN':network,
-                      'pipe':pipe,
-                      'label_scaler':label_scaler}
             date = datetime.datetime.now()
             timestamp = (str(date.year)[-2:] + str(date.month).rjust(2, '0') +
                         str(date.day).rjust(2, '0')
