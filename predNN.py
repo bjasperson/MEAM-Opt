@@ -332,6 +332,8 @@ def main():
 
     df, param_list = import_data()
 
+    df = df[df['lat'] == 'fcc'] # limit to fcc for now
+
     given_params = ['z','ielement','atwt','alat','ibar','rho0','re']
     fit_params = ['alpha','b0','b1','b2','b3','esub','asub',
 				  't1','t2','t3','rozero','rc','delr','zbl',

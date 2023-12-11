@@ -154,6 +154,19 @@ class Optimization():
             
         self.plot_images(images, 'pretrained image')
 
+    def create_output_file(self, test_file):
+        output_lines = []
+        output_line = ["epoch"]
+        output_line.extend(self.pipe.feature_names_in_.tolist())
+        output_line.extend(self.target_prop_names)
+        output_lines.append(output_line)
+        if test_file != False:
+            output_lines.append(test_file)
+        self.output_lines = output_lines
+        return 
+
+
+
     def output_line_fn(self,i):
         output_line = [i]
         pred_fit_params = self.opt_net(self.input_values)
@@ -170,21 +183,18 @@ class Optimization():
         """perform optimization/training of top_op
 
         """
-        output_lines = []
-        output_line = ["epoch"]
-        output_line.extend(self.pipe.feature_names_in_.tolist())
-        output_line.extend(self.target_prop_names)
-        output_lines.append(output_line)
 
         self.perfnn.eval()  #set perf_net to eval mode
         self.opt_net.train() #opt_net is training (influences dropout)
         
         # add initial params and prediction
+        output_lines = self.output_lines
         output_lines.append(self.output_line_fn("initial"))
 
         optimize_loss = []
         error_terms = []
         loss_fn = nn.MSELoss()
+        output_lines_running = []
         
         for i in range(max_epochs):
             # forward pass to obtain predicted images
@@ -204,7 +214,7 @@ class Optimization():
 
             #error_terms.append(error_terms_in)
             if i % 10 == 0 or i == max_epochs-1:
-                output_lines.append(self.output_line_fn(i))
+                output_lines_running.append(self.output_line_fn(i))
 
             if output == True:
                 if i % 100 == 0 or i == max_epochs-1:
@@ -216,6 +226,9 @@ class Optimization():
 
             optimize_loss.append(loss.tolist())
         
+        output_lines.append(self.output_line_fn("final"))
+        output_lines.append([])
+        output_lines.extend(output_lines_running)
         output_lines_df = pd.DataFrame(output_lines[1:], columns = output_lines[0])
         output_lines_df.to_csv(f"./experiments/{self.species}_opt.csv")
 
@@ -423,7 +436,8 @@ def opt_funct(target_species,
     #set given inputs and targets for provided species
     opt.set_inputs(target_species)
     opt.set_targets(target_species)
-        
+
+    opt.create_output_file(test_model)
          
     opt.optimize(num_epochs,output = print_details)
     opt.print_predicted_performance()
@@ -477,18 +491,24 @@ def main():
             ]
     
     df = df.dropna(subset=matl_props)
-
     
-    if True:
-        with open('models/predNN_231208-1909.pkl','rb') as inp:
-            predNN_dict = pickle.load(inp)
+    if True: # provide comparison data for performance evaluation
+        test_model_species = "Ni"
+        test_model_name = "MEAM_LAMMPS_CostaAgrenClavaguera_2007_AlNi__MO_131642768288_002"
+        test_model_df = df[(df['model'] == test_model_name) & (df['species'] == test_model_species)]
+        test_model_df = test_model_df[all_indicators+matl_props]
+        test_model = ["reference"]
+        test_model.extend(test_model_df.values.tolist()[0])
 
-        opt = opt_funct('Ni',
-                        predNN_dict,
-                        given_params,
-                        fit_params,
-                        print_details = True,
-                        test_model = "MEAM_LAMMPS_CostaAgrenClavaguera_2007_AlNi__MO_131642768288_002")
+    with open('models/predNN_231211-0914.pkl','rb') as inp:
+        predNN_dict = pickle.load(inp)
+
+    opt = opt_funct('Ni',
+                    predNN_dict,
+                    given_params,
+                    fit_params,
+                    print_details = True,
+                    test_model = test_model)
 
         # if input('save results? y to save:  ') == 'y':
         #     opt.save_results(perf_nn_folder)
