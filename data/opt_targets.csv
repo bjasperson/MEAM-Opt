@@ -1,2 +1,2 @@
-species,lattice_constant_fcc,bulk_modulus_fcc,c44_fcc,c12_fcc,c11_fcc,cohesive_energy_fcc
-Ni,3.52139174938202,187.585683963972,131.723525531028,150.763057539209,261.2309368135,4.45000000058639
+species,lattice_constant_fcc,bulk_modulus_fcc,c44_fcc,c12_fcc,c11_fcc,cohesive_energy_fcc,thermal_expansion_coeff_fcc,surface_energy_100_fcc
+Ni,3.52139174938202,187.585683963972,131.723525531028,150.763057539209,261.2309368135,4.45000000058639,1.23E-05,0.120813681514897

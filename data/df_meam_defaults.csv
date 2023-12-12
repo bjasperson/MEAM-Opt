@@ -1,0 +1,10 @@
+parameter,default
+zbl,1
+rc,4
+delr,0.1
+attrac,0
+repuls,0
+Cmin,2
+Cmax,2.8
+emb_lin_neg,0
+bkgd_dyn,0

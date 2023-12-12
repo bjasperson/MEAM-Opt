@@ -18,7 +18,7 @@ from sklearn.impute import KNNImputer
 from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 import datetime
-from predNN import PredNet
+from predNN import PredNet, apply_one_hot
 
 
 plt.rcParams['figure.dpi'] = 150
@@ -36,12 +36,12 @@ class OptNet(nn.Module):
         """
         super(OptNet, self).__init__() 
         
-        # self.bn0 = nn.BatchNorm1d(n_given_params)
-        # self.bn1 = nn.BatchNorm1d(20)
-        # self.bn2 = nn.BatchNorm1d(20)
-        # self.bn3 = nn.BatchNorm1d(20)
-        # self.bn4 = nn.BatchNorm1d(20)
-        # self.bn5 = nn.BatchNorm1d(20)
+        self.bn0 = nn.LayerNorm(n_given_params)
+        self.bn1 = nn.LayerNorm(20)
+        self.bn2 = nn.LayerNorm(20)
+        self.bn3 = nn.LayerNorm(20)
+        self.bn4 = nn.LayerNorm(20)
+        self.bn5 = nn.LayerNorm(20)
         
         self.fc1 = nn.Linear(n_given_params, 20)
         nn.init.xavier_normal_(self.fc1.weight) #xavier_normal_from TOuNN.py
@@ -62,15 +62,15 @@ class OptNet(nn.Module):
 
     def forward(self, x):        
         #option w/o dropout
-        # x = self.bn0(x)
+        x = self.bn0(x)
         x = self.l_relu1(self.fc1(x))
-        # x = self.bn1(x)
+        x = self.bn1(x)
         x = self.l_relu2(self.fc2(x))
-        # x = self.bn2(x)
+        x = self.bn2(x)
         x = self.l_relu3(self.fc3(x))
-        # x = self.bn3(x)
+        x = self.bn3(x)
         x = self.l_relu4(self.fc4(x))
-        # x = self.bn4(x)
+        x = self.bn4(x)
         x = self.fc5(x)
 
         return x
@@ -231,6 +231,15 @@ class Optimization():
         output_lines.extend(output_lines_running)
         output_lines_df = pd.DataFrame(output_lines[1:], columns = output_lines[0])
         output_lines_df.to_csv(f"./experiments/{self.species}_opt.csv")
+
+        library_file_params = ['elt', 'z', 'ielement', 'atwt', 
+                               'alpha', 'b0', 'b1', 'b2', 'b3', 'alat', 'esub', 'asub', 
+                               't0','t1', 't2', 't3', 'rozero', 'ibar']
+        
+        output_lines_df['elt'] = self.species
+        output_lines_df['t0'] = 1.0
+        output_lines_df = output_lines_df.set_index('epoch')
+        output_lines_df[library_file_params].loc['final'].to_csv(f"./experiments/{self.species}_opt_library.csv")
 
         # get/show final performance
         self.opt_net.eval()
@@ -451,29 +460,20 @@ def opt_funct(target_species,
 
     return opt
 
-
-def import_data():
-    df = pd.read_csv("data/df_meam_params.csv", index_col=0)
-    #df = df.fillna("")
-    df = df.set_index(["model","species"])
-    # get list of meam params
-    param_list = df.columns.to_list()[0:37]
-    df = df.reset_index()
-
-    return df, param_list
-
-
 def main():
     # will need to bring sklearn SVR model into pytorch
     # https://pythonawesome.com/convert-scikit-learn-models-to-pytorch-modules/
     # https://github.com/unixpickle/sk2torch
 
-    df, param_list = import_data()
+    df = pd.read_csv("data/df_meam_params.csv", index_col=0)
+    # df = apply_one_hot(df)
 
-    given_params = ['z','ielement','atwt','alat','ibar','rho0','re']
+    given_params = ['z','ielement','atwt','alat','ibar','rho0','re','zbl']
     fit_params = ['alpha','b0','b1','b2','b3','esub','asub',
-				  't1','t2','t3','rozero','rc','delr','zbl',
-				  'attrac','repuls','Cmin','Cmax','Ec']
+				  't1','t2','t3','rozero','rc','delr',
+				  'attrac','repuls','Cmin','Cmax','Ec',
+                  'emb_lin_neg','bkgd_dyn'
+                  ]
     all_indicators = given_params + fit_params
 
     # property list to explore, commented out props with few data points
@@ -494,13 +494,16 @@ def main():
     
     if True: # provide comparison data for performance evaluation
         test_model_species = "Ni"
-        test_model_name = "MEAM_LAMMPS_CostaAgrenClavaguera_2007_AlNi__MO_131642768288_002"
+        test_model_dict = {"Ni":"MEAM_LAMMPS_CostaAgrenClavaguera_2007_AlNi__MO_131642768288_002",
+                           "Al":"MEAM_LAMMPS_LeeShimBaskes_2003_Al__MO_353977746962_001"}
+        test_model_name = test_model_dict[test_model_species]
         test_model_df = df[(df['model'] == test_model_name) & (df['species'] == test_model_species)]
         test_model_df = test_model_df[all_indicators+matl_props]
         test_model = ["reference"]
         test_model.extend(test_model_df.values.tolist()[0])
 
-    with open('models/predNN_231211-0914.pkl','rb') as inp:
+    model_id = '231213-1059'#"231212-1422"
+    with open(f'models/{model_id}/predNN_{model_id}.pkl','rb') as inp:
         predNN_dict = pickle.load(inp)
 
     opt = opt_funct('Ni',

@@ -28,12 +28,13 @@ class PredNet(nn.Module):
         super().__init__()
         self.fc1 = nn.Linear(n_params, n_params)
         self.fc2 = nn.Linear(n_params, n_labels)
+        self.fc3 = nn.Linear(n_labels, n_labels)
         return
 
     def forward(self,x):
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 
@@ -50,8 +51,8 @@ def use_gpu(use_gpu):
 
 def plot_pred_vs_actual(y_train_pred, y_train,
                         y_test_pred, y_test,
-                        property):
-    plt.figure()
+                        property,show_fig = True):
+    fig = plt.figure()
     plt.scatter(y_train,y_train_pred,label="train")
     plt.scatter(y_test,y_test_pred,label="test")
     plt.plot([min(y_train),max(y_train)],
@@ -60,7 +61,9 @@ def plot_pred_vs_actual(y_train_pred, y_train,
     plt.ylabel('pred')
     plt.legend()
     plt.title(property)
-    plt.show()
+    if show_fig == True:
+        plt.show()
+    return fig
 
 def vis_model_weights(model,layer):
     """plot model weights
@@ -258,12 +261,13 @@ def train_predNN(df,
     
     y_test_pred = label_scaler.inverse_transform(y_test_pred)
 
-    for i,p in enumerate(matl_props):
-        plot_pred_vs_actual(y_train_pred[:,i],
-                            y_train[:,i],
-                            y_test_pred[:,i],
-                            y_test[:,i],
-                            p)
+    if False:
+        for i,p in enumerate(matl_props):
+            plot_pred_vs_actual(y_train_pred[:,i],
+                                y_train[:,i],
+                                y_test_pred[:,i],
+                                y_test[:,i],
+                                p)
 
     print('----Evaluate done ----')
 
@@ -279,8 +283,17 @@ def train_predNN(df,
                         str(date.day).rjust(2, '0')
                         + '-' + str(date.hour).rjust(2, '0') +
                         str(date.minute).rjust(2, '0'))
-            torch.save(network.state_dict(), f'./models/predNN_{timestamp}.pth')
-            with open(f'./models/predNN_{timestamp}.pkl', 'wb') as outp:
+            os.mkdir(f"./models/{timestamp}")
+            for i,p in enumerate(matl_props):
+                fig = plot_pred_vs_actual(y_train_pred[:,i],
+                            y_train[:,i],
+                            y_test_pred[:,i],
+                            y_test[:,i],
+                            p, show_fig = False)
+                fig.savefig(f"./models/{timestamp}/pred_{p}.png")
+                plt.close()
+            torch.save(network.state_dict(), f'./models/{timestamp}/predNN_{timestamp}.pth')
+            with open(f'./models/{timestamp}/predNN_{timestamp}.pkl', 'wb') as outp:
                 pickle.dump(output, outp, pickle.HIGHEST_PROTOCOL)
 
     # if plot_out == True:
@@ -317,12 +330,18 @@ def get_all_preds(dataloader, model, device):
 def import_data():
     df = pd.read_csv("data/df_meam_params.csv", index_col=0)
     #df = df.fillna("")
-    df = df.set_index(["model","species"])
-    # get list of meam params
-    param_list = df.columns.to_list()[0:37]
-    df = df.reset_index()
+    # df = df.set_index(["model","species"])
+    # # get list of meam params
+    # param_list = df.columns.to_list()[0:37]
+    # df = df.reset_index()
 
-    return df, param_list
+    return df#, param_list
+
+
+def apply_one_hot(df):
+    df_lat = pd.get_dummies(df['lat'])
+    df = pd.concat((df_lat,df),axis=1)
+    return df
 
 #########################################################
 def main():
@@ -330,22 +349,24 @@ def main():
     # https://pythonawesome.com/convert-scikit-learn-models-to-pytorch-modules/
     # https://github.com/unixpickle/sk2torch
 
-    df, param_list = import_data()
+    df = import_data()
+    # df = apply_one_hot(df) # not sure if this is better
 
     df = df[df['lat'] == 'fcc'] # limit to fcc for now
 
-    given_params = ['z','ielement','atwt','alat','ibar','rho0','re']
+    given_params = ['z','ielement','atwt','alat','ibar','rho0','re','zbl']
     fit_params = ['alpha','b0','b1','b2','b3','esub','asub',
-				  't1','t2','t3','rozero','rc','delr','zbl',
-				  'attrac','repuls','Cmin','Cmax','Ec']
+				  't1','t2','t3','rozero','rc','delr',
+				  'attrac','repuls','Cmin','Cmax','Ec',
+                  'emb_lin_neg','bkgd_dyn']
     all_indicators = given_params + fit_params
 
     # property list to explore, commented out props with few data points
     matl_props = ['lattice_constant_fcc', 'bulk_modulus_fcc',
             'c44_fcc', 'c12_fcc', 'c11_fcc',
             'cohesive_energy_fcc', 
-            #'thermal_expansion_coeff_fcc', # not a lot of points
-            #'surface_energy_100_fcc', # not a lot of points
+            'thermal_expansion_coeff_fcc', # not a lot of points
+            'surface_energy_100_fcc', # not a lot of points
             #'extr_stack_fault_energy_fcc', 'intr_stack_fault_energy_fcc',
             #'unstable_stack_energy_fcc', 'unstable_twinning_energy_fcc',
             #'relaxed_formation_potential_energy_fcc',
