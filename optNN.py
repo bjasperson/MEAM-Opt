@@ -480,8 +480,8 @@ def main():
     matl_props = ['lattice_constant_fcc', 'bulk_modulus_fcc',
             'c44_fcc', 'c12_fcc', 'c11_fcc',
             'cohesive_energy_fcc', 
-            #'thermal_expansion_coeff_fcc', # not a lot of points
-            #'surface_energy_100_fcc', # not a lot of points
+            'thermal_expansion_coeff_fcc', # not a lot of points
+            'surface_energy_100_fcc', # not a lot of points
             #'extr_stack_fault_energy_fcc', 'intr_stack_fault_energy_fcc',
             #'unstable_stack_energy_fcc', 'unstable_twinning_energy_fcc',
             #'relaxed_formation_potential_energy_fcc',
