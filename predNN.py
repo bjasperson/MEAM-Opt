@@ -54,7 +54,7 @@ def plot_pred_vs_actual(y_train_pred, y_train,
                         property,show_fig = True):
     fig = plt.figure()
     plt.scatter(y_train,y_train_pred,label="train")
-    plt.scatter(y_test,y_test_pred,label="test")
+    plt.scatter(y_test,y_test_pred,label="test",marker="X")
     plt.plot([min(y_train),max(y_train)],
             [min(y_train),max(y_train)])
     plt.xlabel('actual')
@@ -290,7 +290,7 @@ def train_predNN(df,
                             y_test_pred[:,i],
                             y_test[:,i],
                             p, show_fig = False)
-                fig.savefig(f"./models/{timestamp}/pred_{p}.png")
+                fig.savefig(f"./models/{timestamp}/pred_{p}.eps", dpi=300)
                 plt.close()
             torch.save(network.state_dict(), f'./models/{timestamp}/predNN_{timestamp}.pth')
             with open(f'./models/{timestamp}/predNN_{timestamp}.pkl', 'wb') as outp:
