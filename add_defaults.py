@@ -2,6 +2,10 @@ import pandas as pd
 
 
 def main():
+    '''
+    replaces missing values with the default values for MEAM in LAMMPS.
+    See https://openkim.org/files/MD_249792265679_002/README.md for values.
+    '''
     df = pd.read_csv("data/df_meam_params.csv",index_col = 0)
     df_defaults = pd.read_csv("data/df_meam_defaults.csv")
     df_defaults = df_defaults.set_index("parameter")

@@ -18,6 +18,10 @@ def filter_df(df):
     return df
 
 def main():
+    '''
+    Create combined bibfile of all models
+    and drivers used for research
+    '''
     # import list of models used
     df = import_data()
     df = filter_df(df)

@@ -269,144 +269,144 @@ def openkim_search(query, fields, database = 'data'):
     return result
 
 
-def remove_gb_outliers(df, energy_limits):
-    """
-    remove outliers based on energy limits (energy in lists)
+# def remove_gb_outliers(df, energy_limits):
+#     """
+#     remove outliers based on energy limits (energy in lists)
     
-    :param df: DESCRIPTION
-    :type df: TYPE
-    :param energy_limits: DESCRIPTION
-    :type energy_limits: TYPE
-    :return: DESCRIPTION
-    :rtype: TYPE
+#     :param df: DESCRIPTION
+#     :type df: TYPE
+#     :param energy_limits: DESCRIPTION
+#     :type energy_limits: TYPE
+#     :return: DESCRIPTION
+#     :rtype: TYPE
 
-    """
-    df_out = df.copy()
-    n = df_out.shape[0]
-    to_drop = []
-    for i in range(len(df_out)):
-        current = df_out.iloc[i]
-        if min(np.array(current.grain_energy)) < energy_limits[0]:
-            to_drop.append(i)
-        if max(np.array(current.grain_energy)) > energy_limits[1]:
-            to_drop.append(i)
-    df_out = df_out.drop(to_drop)
-    n_out = df_out.shape[0]
-    print(f'----dropped {n-n_out} outliers----')
-    return df_out
+#     """
+#     df_out = df.copy()
+#     n = df_out.shape[0]
+#     to_drop = []
+#     for i in range(len(df_out)):
+#         current = df_out.iloc[i]
+#         if min(np.array(current.grain_energy)) < energy_limits[0]:
+#             to_drop.append(i)
+#         if max(np.array(current.grain_energy)) > energy_limits[1]:
+#             to_drop.append(i)
+#     df_out = df_out.drop(to_drop)
+#     n_out = df_out.shape[0]
+#     print(f'----dropped {n-n_out} outliers----')
+#     return df_out
 
 
-def pairplot_fun(df, plot_variables, filter_params=[]):
-    """
-    plot of variables against each other
+# def pairplot_fun(df, plot_variables, filter_params=[]):
+#     """
+#     plot of variables against each other
     
-    :param df: dataframe
-    :type df: pandas.DataFrame
-    :param filter_params: df column string with filter value
-    :type filter_params: dict
-    :param plot_variables: list of variables to include in plotting
-    :type plot_variables: list
-    :return: 
-    :rtype: 
+#     :param df: dataframe
+#     :type df: pandas.DataFrame
+#     :param filter_params: df column string with filter value
+#     :type filter_params: dict
+#     :param plot_variables: list of variables to include in plotting
+#     :type plot_variables: list
+#     :return: 
+#     :rtype: 
 
-    """
-    #in: dataframe, variables to include
-    #out: scatterplots of each variable combination
+#     """
+#     #in: dataframe, variables to include
+#     #out: scatterplots of each variable combination
     
-    #to consider for filtering: 'tilt_axis', 'angle', 'species'
+#     #to consider for filtering: 'tilt_axis', 'angle', 'species'
     
-    if 'crystal_type' not in plot_variables:
-        plot_variables.append('crystal_type')
+#     if 'crystal_type' not in plot_variables:
+#         plot_variables.append('crystal_type')
     
-    df_filtered = filter_df(df, filter_params)
-    a = sns.pairplot(df_filtered[plot_variables], hue = 'crystal_type')
-    a.fig.suptitle(str(filter_params),y=1.001)
+#     df_filtered = filter_df(df, filter_params)
+#     a = sns.pairplot(df_filtered[plot_variables], hue = 'crystal_type')
+#     a.fig.suptitle(str(filter_params),y=1.001)
     
-    return
+#     return
 
-def filter_df(df, dict_params):
-    """
-    filter a dataframe based on parameter dict
+# def filter_df(df, dict_params):
+#     """
+#     filter a dataframe based on parameter dict
     
-    :param df: original DF
-    :type df: pd.DataFrame
-    :param dict_params: dictionary of parameters to filter by
-    :type dict_params: dict
-    :return: filtered dataframe
-    :rtype: pd.DataFrame
+#     :param df: original DF
+#     :type df: pd.DataFrame
+#     :param dict_params: dictionary of parameters to filter by
+#     :type dict_params: dict
+#     :return: filtered dataframe
+#     :rtype: pd.DataFrame
 
-    """
+#     """
         
-    df_out = df.copy()
-    for parameter in dict_params:
-        if parameter == 'angle':
-            df_out = df_out[round(df_out[parameter],3) == round(dict_params[parameter],3)]
-        else:
-            df_out = df_out[df_out[parameter] == dict_params[parameter]]
-    return df_out
+#     df_out = df.copy()
+#     for parameter in dict_params:
+#         if parameter == 'angle':
+#             df_out = df_out[round(df_out[parameter],3) == round(dict_params[parameter],3)]
+#         else:
+#             df_out = df_out[df_out[parameter] == dict_params[parameter]]
+#     return df_out
 
-def extract_model_list(df):
-    df_models = df.copy()
-    ids = ['species','tilt_axis', 'crystal_type', 'angle']
-    df_models = df_models[ids]
-    df_models = df_models.drop_duplicates()
-    ids.append('model')
-    model_list = []
-    for i in range(len(df_models)):
-        models = filter_df(df,{'species':df_models.iloc[i]['species'],
-                               'tilt_axis':df_models.iloc[i]['tilt_axis'],
-                               'crystal_type':df_models.iloc[i]['crystal_type']})
-        models = models[ids]
-        models = models.drop_duplicates()
-        model_list.append(models['model'].values.tolist())
+# def extract_model_list(df):
+#     df_models = df.copy()
+#     ids = ['species','tilt_axis', 'crystal_type', 'angle']
+#     df_models = df_models[ids]
+#     df_models = df_models.drop_duplicates()
+#     ids.append('model')
+#     model_list = []
+#     for i in range(len(df_models)):
+#         models = filter_df(df,{'species':df_models.iloc[i]['species'],
+#                                'tilt_axis':df_models.iloc[i]['tilt_axis'],
+#                                'crystal_type':df_models.iloc[i]['crystal_type']})
+#         models = models[ids]
+#         models = models.drop_duplicates()
+#         model_list.append(models['model'].values.tolist())
         
-    df_models['model_list'] = model_list
+#     df_models['model_list'] = model_list
     
-    return df_models
+#     return df_models
     
 
-def get_feature_correlation(df, top_n=None, corr_method='spearman',
-                            remove_duplicates=True, remove_self_correlations=True):
-    """
-    Compute the feature correlation and sort feature pairs based on their correlation
+# def get_feature_correlation(df, top_n=None, corr_method='spearman',
+#                             remove_duplicates=True, remove_self_correlations=True):
+#     """
+#     Compute the feature correlation and sort feature pairs based on their correlation
 
-    from: https://stackoverflow.com/questions/61146233/how-to-use-sklearn-chi-square-or-anova-to-removes-redundant-features
+#     from: https://stackoverflow.com/questions/61146233/how-to-use-sklearn-chi-square-or-anova-to-removes-redundant-features
 
-    :param df: The dataframe with the predictor variables
-    :type df: pandas.core.frame.DataFrame
-    :param top_n: Top N feature pairs to be reported (if None, all of the pairs will be returned)
-    :param corr_method: Correlation compuation method
-    :type corr_method: str
-    :param remove_duplicates: Indicates whether duplicate features must be removed
-    :type remove_duplicates: bool
-    :param remove_self_correlations: Indicates whether self correlations will be removed
-    :type remove_self_correlations: bool
+#     :param df: The dataframe with the predictor variables
+#     :type df: pandas.core.frame.DataFrame
+#     :param top_n: Top N feature pairs to be reported (if None, all of the pairs will be returned)
+#     :param corr_method: Correlation compuation method
+#     :type corr_method: str
+#     :param remove_duplicates: Indicates whether duplicate features must be removed
+#     :type remove_duplicates: bool
+#     :param remove_self_correlations: Indicates whether self correlations will be removed
+#     :type remove_self_correlations: bool
 
-    :return: pandas.core.frame.DataFrame
-    """
-    corr_matrix_abs = df.corr(method=corr_method).abs()
-    corr_matrix_abs_us = corr_matrix_abs.unstack()
-    sorted_correlated_features = corr_matrix_abs_us \
-        .sort_values(kind="quicksort", ascending=False) \
-        .reset_index()
+#     :return: pandas.core.frame.DataFrame
+#     """
+#     corr_matrix_abs = df.corr(method=corr_method).abs()
+#     corr_matrix_abs_us = corr_matrix_abs.unstack()
+#     sorted_correlated_features = corr_matrix_abs_us \
+#         .sort_values(kind="quicksort", ascending=False) \
+#         .reset_index()
 
-    # Remove comparisons of the same feature
-    if remove_self_correlations:
-        sorted_correlated_features = sorted_correlated_features[
-            (sorted_correlated_features.level_0 != sorted_correlated_features.level_1)
-        ]
+#     # Remove comparisons of the same feature
+#     if remove_self_correlations:
+#         sorted_correlated_features = sorted_correlated_features[
+#             (sorted_correlated_features.level_0 != sorted_correlated_features.level_1)
+#         ]
 
-    # Remove duplicates
-    if remove_duplicates:
-        sorted_correlated_features = sorted_correlated_features.iloc[:-2:2]
+#     # Remove duplicates
+#     if remove_duplicates:
+#         sorted_correlated_features = sorted_correlated_features.iloc[:-2:2]
 
-    # Create meaningful names for the columns
-    sorted_correlated_features.columns = ['Feature 1', 'Feature 2', 'Correlation (abs)'] 
+#     # Create meaningful names for the columns
+#     sorted_correlated_features.columns = ['Feature 1', 'Feature 2', 'Correlation (abs)'] 
 
-    if top_n:
-        return sorted_correlated_features[:top_n]
+#     if top_n:
+#         return sorted_correlated_features[:top_n]
 
-    return sorted_correlated_features
+#     return sorted_correlated_features
 
 def get_prop_df(props, df_ref):
     df_list = get_tests(props)
@@ -434,36 +434,36 @@ def get_prop_df(props, df_ref):
     return df_merge
 
 
-def get_df_grain():
-    df_grain = get_tests(['grain_energy'])[0]
-    #df_grain = df_grain.rename(columns = {'crystal_type':'crystal_type'})
+# def get_df_grain():
+#     df_grain = get_tests(['grain_energy'])[0]
+#     #df_grain = df_grain.rename(columns = {'crystal_type':'crystal_type'})
         
-    #change tilt from a list to a string
-    tilt = [str(i) for i in df_grain.tilt_axis.values]
-    df_grain['tilt_axis'] = tilt
+#     #change tilt from a list to a string
+#     tilt = [str(i) for i in df_grain.tilt_axis.values]
+#     df_grain['tilt_axis'] = tilt
     
-    #change angle from list to tuple
-    angle = [tuple(i) for i in df_grain.angle]
-    df_grain['angle'] = angle
-    return df_grain
+#     #change angle from list to tuple
+#     angle = [tuple(i) for i in df_grain.angle]
+#     df_grain['angle'] = angle
+#     return df_grain
 
 
-def get_merged_df(props):
-    """get df with grain boundary energy and properties listed
+# def get_merged_df(props):
+#     """get df with grain boundary energy and properties listed
 
-    :param props: properties (beyond grain boundary energy) to include
-    :type props: list of strings
-    :return: merged results
-    :rtype: dataframe
-    """
+#     :param props: properties (beyond grain boundary energy) to include
+#     :type props: list of strings
+#     :return: merged results
+#     :rtype: dataframe
+#     """
 
-    df_grain = get_df_grain()
+#     df_grain = get_df_grain()
     
-    #get test results and merge for prediction properties
-    df_merge = get_prop_df(props, df_grain)
-    df_merge = df_merge.reset_index(drop=True)
+#     #get test results and merge for prediction properties
+#     df_merge = get_prop_df(props, df_grain)
+#     df_merge = df_merge.reset_index(drop=True)
 
-    return df_merge
+#     return df_merge
 
 
 def flatten_crystal_type(df_list):
@@ -476,15 +476,15 @@ def flatten_crystal_type(df_list):
     return df_list
 
 
-def get_md_avg(df_in):
-    df = df_in.copy()
-    df = df.groupby(['species', 'crystal_type']).agg(['mean']).reset_index()
-    df.columns = [i[0] for i in df.columns]
-    #df = pd.merge(df_in[['species','tilt_axis','crystal_type','angle','grain_energy_analytical']],df,how='left',on='species')
-    df = pd.merge(df_in[['species','tilt_axis','crystal_type','angle']],df,how='left',on=['species','crystal_type'])
-    df = df.drop_duplicates()
-    df = df.reset_index(drop = True)
-    return df
+# def get_md_avg(df_in):
+#     df = df_in.copy()
+#     df = df.groupby(['species', 'crystal_type']).agg(['mean']).reset_index()
+#     df.columns = [i[0] for i in df.columns]
+#     #df = pd.merge(df_in[['species','tilt_axis','crystal_type','angle','grain_energy_analytical']],df,how='left',on='species')
+#     df = pd.merge(df_in[['species','tilt_axis','crystal_type','angle']],df,how='left',on=['species','crystal_type'])
+#     df = df.drop_duplicates()
+#     df = df.reset_index(drop = True)
+#     return df
 
 
 def get_all_IPs():
@@ -511,44 +511,3 @@ def get_all_IPs():
                         "kim_code":code})
 
     return df
-
-# not needed for GB
-# def strength_ledger_import(file_location):
-#     df_ips = pd.read_csv(file_location)
-#     df_ips['type'] = [i.split("_")[2] for i in df_ips.ported_kimcode]
-#     df_ips['authors'] = [i.split("_")[3] for i in df_ips.ported_kimcode]
-#     df_ips['year'] = [i.split("_")[4] for i in df_ips.ported_kimcode]
-#     df_ips['model_species'] = [i.split("_")[5] for i in df_ips.ported_kimcode]
-#     df_ips['llnl_code'] = [i.split("__")[1] for i in df_ips.ported_kimcode]
-
-#     df_models = get_all_IPs()
-    
-#     print(f"shape of llnl data: {df_ips.shape}")
-
-#     # merge for EAMs: filter on EAM_Dynamo
-#     df1 = pd.merge(df_ips, df_models[(df_models['type1'] == 'EAM') & (df_models['type2'] == 'Dynamo')],
-#                   how='inner',on=['authors','year','model_species'])
-
-#     # merge on SNAP: no duplicates known
-#     df2 = pd.merge(df_ips, df_models[(df_models['type1'] == 'SNAP')],
-#                   how='inner',on=['authors','year','model_species'])
-
-#     # merge for others, use llnl code
-#     df3 = pd.merge(df_ips, df_models,
-#                   how='inner',
-#                   left_on=['authors','year','model_species','llnl_code'],
-#                   right_on=['authors','year','model_species','kim_code'])
-    
-#     df = pd.concat([df1,df2,df3])
-
-#     print(f"final shape: {df.shape}")
-
-
-#     df = df.rename({"original_model":"model",
-#                     "ported_kimcode":"llnl_ported_kimcode"},
-#                     axis=1)
-    
-#     study_details_list = ['potential_type','file_sys_num','authors','year','model_species']
-#     df['study_details'] = df[study_details_list].values.tolist()
-#     df = df.drop(study_details_list,axis=1)
-#     return df
