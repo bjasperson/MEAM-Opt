@@ -51,16 +51,28 @@ def use_gpu(use_gpu):
 
 def plot_pred_vs_actual(y_train_pred, y_train,
                         y_test_pred, y_test,
-                        property,show_fig = True):
-    fig = plt.figure()
-    plt.scatter(y_train,y_train_pred,label="train")
-    plt.scatter(y_test,y_test_pred,label="test",marker="X")
-    plt.plot([min(y_train),max(y_train)],
-            [min(y_train),max(y_train)])
-    plt.xlabel('actual')
-    plt.ylabel('pred')
-    plt.legend()
-    plt.title(property)
+                        property,show_fig = True,
+                        figsize = (2.5,2.5)):
+    fig,ax = plt.subplots(figsize = figsize, layout = 'constrained')
+    ax.scatter(y_train,y_train_pred,label="train")
+    ax.scatter(y_test,y_test_pred,label="test",marker="X")
+    max_value =max(np.concatenate([y_train,y_test,y_train_pred, y_test_pred]))
+    min_value = min(np.concatenate([y_train,y_test,y_train_pred, y_test_pred]))
+    ax.plot([min_value,max_value],
+            [min_value,max_value])
+    ax.set_xlim(.95*min_value,1.05*max_value)
+    ax.set_ylim(.95*min_value,1.05*max_value)
+    ax.set_xlabel('actual',fontsize=8)
+    ax.set_ylabel('prediction',fontsize=8)
+    ax.legend(fontsize=8)
+    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=8)
+
+    ax.text(0.95,0.05, f"{property}",
+            transform=ax.transAxes,
+            verticalalignment='bottom', horizontalalignment='right',
+            fontsize=8)
+    ax.set_aspect('equal', adjustable='box')
     if show_fig == True:
         plt.show()
     return fig
@@ -295,6 +307,13 @@ def train_predNN(df,
             torch.save(network.state_dict(), f'./models/{timestamp}/predNN_{timestamp}.pth')
             with open(f'./models/{timestamp}/predNN_{timestamp}.pkl', 'wb') as outp:
                 pickle.dump(output, outp, pickle.HIGHEST_PROTOCOL)
+
+            np.save(f"./models/{timestamp}/y_train.npy",y_train)
+            np.save(f"./models/{timestamp}/y_test.npy",y_test)
+            np.save(f"./models/{timestamp}/y_train_pred.npy",y_train_pred)
+            np.save(f"./models/{timestamp}/y_test_pred.npy",y_test_pred)
+            with open(f"./models/{timestamp}/matl_props.txt",'w') as f:
+                f.write(str(matl_props))
 
     # if plot_out == True:
     #     evaluate.plot_results()

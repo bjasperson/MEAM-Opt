@@ -1,0 +1,1 @@
+['lattice_constant_fcc', 'bulk_modulus_fcc', 'c44_fcc', 'c12_fcc', 'c11_fcc', 'cohesive_energy_fcc', 'thermal_expansion_coeff_fcc', 'surface_energy_100_fcc']
