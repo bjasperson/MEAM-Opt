@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -173,14 +169,19 @@ def train_predNN(df,
                  learning_rate = 0.001,
                  n_batch = 2**3,
                  save_out = True,
-                 plot_out = True
+                 plot_out = True,
+                 df_train = "",
+                 df_test = ""
                  ):
     """
     """
     #######################
 
     # split data into train/test
-    df_train, df_test = train_test_split(df, shuffle=True)
+    if type(df_train) is str:
+        df_train, df_test = train_test_split(df, shuffle=True)
+    else:
+        del(df)
 
     # normalize inputs based on training meam params
     # might need an imputer here too for features
@@ -248,11 +249,12 @@ def train_predNN(df,
     print("Done!")
 
     ########################################################
-    # plot test/train error
-    plt.plot(np.array(test_error), label='test_error')
-    plt.plot(np.array(train_error), label='train_error')
-    plt.legend()
-    plt.show()
+    if plot_out == True:
+        # plot test/train error
+        plt.plot(np.array(test_error), label='test_error')
+        plt.plot(np.array(train_error), label='train_error')
+        plt.legend()
+        plt.show()
 
     ########################################################
     # get predictions for all data and plot
@@ -285,7 +287,9 @@ def train_predNN(df,
 
     output = {'predNN':network,
             'pipe':pipe,
-            'label_scaler':label_scaler}
+            'label_scaler':label_scaler,
+            'y_test':y_test,
+            'y_test_pred':y_test_pred}
     ###########################################
     if save_out == True:
         if input('save NN model + stats? y to save:    ') == 'y':
@@ -362,12 +366,8 @@ def apply_one_hot(df):
     df = pd.concat((df_lat,df),axis=1)
     return df
 
-#########################################################
-def main():
-    # will need to bring sklearn SVR model into pytorch
-    # https://pythonawesome.com/convert-scikit-learn-models-to-pytorch-modules/
-    # https://github.com/unixpickle/sk2torch
 
+def prep_data_and_labels():
     df = import_data()
     # df = apply_one_hot(df) # not sure if this is better
 
@@ -378,6 +378,7 @@ def main():
 				  't1','t2','t3','rozero','rc','delr',
 				  'attrac','repuls','Cmin','Cmax','Ec',
                   'emb_lin_neg','bkgd_dyn']
+    
     all_indicators = given_params + fit_params
 
     # property list to explore, commented out props with few data points
@@ -395,6 +396,16 @@ def main():
             ]
     
     df = df.dropna(subset=matl_props)
+    return df, all_indicators, matl_props
+
+#########################################################
+def main():
+    # will need to bring sklearn SVR model into pytorch
+    # https://pythonawesome.com/convert-scikit-learn-models-to-pytorch-modules/
+    # https://github.com/unixpickle/sk2torch
+
+    df, all_indicators, matl_props = prep_data_and_labels()
+
     pred_nn_dict = train_predNN(df, 
                         all_indicators, 
                         matl_props,
