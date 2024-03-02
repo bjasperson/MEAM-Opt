@@ -29,7 +29,7 @@ def pred_plots(label_dict, timestamp):
     return
 
 
-def pairplot_func(df, to_compare, filename, height = 1):
+def pairplot_func(df, to_compare, filename, height = 1, tick_fontsize = 8):
     sns.reset_defaults()
     sns.set(style="ticks")#, color_codes=True)
     sns.set(font_scale=0.85)
@@ -37,8 +37,11 @@ def pairplot_func(df, to_compare, filename, height = 1):
     to_compare.extend(['species'])
     fig = sns.pairplot(data = df[to_compare], corner = 'true', height = height,
                         plot_kws = dict(s=10, facecolor='b', edgecolor="b"))
-    #fig._legend.remove()
-    #fig.savefig(f"./figs/{filename}.png", dpi=300)
+
+    fig.tick_params(axis='x', labelrotation=90) #labelsize = tick_fontsize
+    for ax in fig.axes.flatten():
+        if ax is not None:
+            ax.get_xaxis().set_label_coords(0.5,-0.75)
     fig.savefig(f"./figs/{filename}.eps")
     plt.close()
 
